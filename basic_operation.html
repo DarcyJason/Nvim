@@ -1,0 +1,284 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>简单的文本编辑 - vim</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="basic_operation.html" class="active"><strong aria-hidden="true">1.</strong> 简单的文本编辑</a></li><li class="chapter-item expanded "><a href="quick_move.html"><strong aria-hidden="true">2.</strong> 快速移动</a></li><li class="chapter-item expanded "><a href="advanced_operation.html"><strong aria-hidden="true">3.</strong> 进阶</a></li><li class="chapter-item expanded "><a href="ex_editor.html"><strong aria-hidden="true">4.</strong> ex编辑器概述</a></li><li class="chapter-item expanded "><a href="exchange.html"><strong aria-hidden="true">5.</strong> 全局替换</a></li><li class="chapter-item expanded "><a href="advanced_edit.html"><strong aria-hidden="true">6.</strong> 高级编辑</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">vim</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="简单的文本编辑"><a class="header" href="#简单的文本编辑">简单的文本编辑</a></h1>
+<h2 id="一简单的光标移动"><a class="header" href="#一简单的光标移动">一、简单的光标移动</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>移动</th><th>命令</th></tr></thead><tbody>
+<tr><td>左移一位</td><td>h 或 backspace</td></tr>
+<tr><td>下移一位</td><td>j 或 control n 或 enter</td></tr>
+<tr><td>上移一位</td><td>k 或 control p</td></tr>
+<tr><td>右移一位</td><td>l 或 空格</td></tr>
+<tr><td>到下一行的第一个字符</td><td>+</td></tr>
+<tr><td>到上一行的第一个字符</td><td>-</td></tr>
+<tr><td>到单词结尾</td><td>e 或 E</td></tr>
+<tr><td>向前一个单词</td><td>w 或 W</td></tr>
+<tr><td>向后一个单词</td><td>b 或 B</td></tr>
+<tr><td>到行尾</td><td>$</td></tr>
+<tr><td>到行首</td><td>0</td></tr>
+<tr><td>到特定行</td><td>G</td></tr>
+</tbody></table>
+</div>
+<h2 id="二简单的编辑命令"><a class="header" href="#二简单的编辑命令">二、简单的编辑命令</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>文本对象</th><th>更改</th><th>删除</th><th>复制</th></tr></thead><tbody>
+<tr><td>一个单词</td><td>cw</td><td>dw</td><td>yw</td></tr>
+<tr><td>以空白字符分隔的两个单词</td><td>2cw 或 c2w</td><td>2dw 或 d2w</td><td>2yW 或 y2W</td></tr>
+<tr><td>光标向后的3个单词</td><td>3cb 或 c3b</td><td>3db 或 d3b</td><td>3yb 或 y3b</td></tr>
+<tr><td>单行</td><td>cc</td><td>dd</td><td>yy 或 Y</td></tr>
+<tr><td>直到行尾</td><td>c$ 或 C</td><td>d$ 或 D</td><td>y$</td></tr>
+<tr><td>直到行首</td><td>c0</td><td>d0</td><td>y0</td></tr>
+<tr><td>单个字符</td><td>r</td><td>x 或 X</td><td>yl 或 yh</td></tr>
+<tr><td>5个字符</td><td>5s</td><td>5x</td><td>5yl</td></tr>
+</tbody></table>
+</div>
+<h2 id="三简单的操作命令"><a class="header" href="#三简单的操作命令">三、简单的操作命令</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>操作</th><th>命令</th></tr></thead><tbody>
+<tr><td>取出寄存器中的文本</td><td>p 或 P</td></tr>
+<tr><td>启动 vi 并打开文件(如果指定)</td><td>vi file</td></tr>
+<tr><td>启动 vim 并打开文件(如果指定)</td><td>vim file</td></tr>
+<tr><td>启动 nvim 并打开文件(如果指定)</td><td>nvim file</td></tr>
+<tr><td>保存编辑并退出</td><td>ZZ 或 :wq enter</td></tr>
+<tr><td>不保存编辑并退出</td><td>:q! enter</td></tr>
+<tr><td>将vim挂起在后台</td><td>control z</td></tr>
+<tr><td>从后台恢复vim</td><td>fg</td></tr>
+</tbody></table>
+</div>
+<h2 id="四文本创建和操作命令"><a class="header" href="#四文本创建和操作命令">四、文本创建和操作命令</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>编辑操作</th><th>命令</th></tr></thead><tbody>
+<tr><td>在当前位置插入文本</td><td>i</td></tr>
+<tr><td>在行首插入文本</td><td>I</td></tr>
+<tr><td>在当前位置追加文本</td><td>a</td></tr>
+<tr><td>在行尾追加文本</td><td>A</td></tr>
+<tr><td>在光标下方新建一行, 等待输入文本</td><td>o</td></tr>
+<tr><td>在光标上方新疆一行, 等待输入文本</td><td>O</td></tr>
+<tr><td>将被删除的文本放置在光标之后或当前行之下</td><td>p</td></tr>
+<tr><td>将被删除的文本放置在光标之前或当前行之上</td><td>P</td></tr>
+<tr><td>替换光标所在的字符</td><td>r</td></tr>
+<tr><td>使用新文本覆盖现有字符</td><td>R</td></tr>
+<tr><td>删除当前字符并进入插入模式</td><td>s</td></tr>
+<tr><td>删除行并替换文本</td><td>S</td></tr>
+<tr><td>删除光标所在的字符</td><td>x</td></tr>
+<tr><td>删除光标之前的单个字符</td><td>X</td></tr>
+<tr><td>合并当前行和下一行</td><td>J</td></tr>
+<tr><td>切换当前字符大小写</td><td>~</td></tr>
+<tr><td>重复上一次的操作</td><td>.</td></tr>
+<tr><td>撤销上一次的更改</td><td>u</td></tr>
+<tr><td>将行恢复到原状</td><td>U</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+                            <a rel="next prefetch" href="quick_move.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+                    <a rel="next prefetch" href="quick_move.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
